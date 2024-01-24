@@ -55,7 +55,7 @@
         - name: "UserD"
           groups: "GroupC"
         - name: "UserE"
-          groups: "Group C"
+          groups: "GroupC"
       retries: 5
       delay: 10
 
