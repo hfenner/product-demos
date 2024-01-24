@@ -48,6 +48,8 @@
           groups: "GroupB"
         - name: "UserC"
           groups: "GroupC"
+        - name: "UserD"
+          groups: "GroupC"        
       retries: 5
       delay: 10
 
