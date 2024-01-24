@@ -13,6 +13,7 @@
       ansible.windows.win_domain:
         dns_domain_name: ansible.local
         safe_mode_password: "{{ lookup('community.general.random_string', min_lower=1, min_upper=1, min_special=1, min_numeric=1) }}"
+      register: win_domain_output
       notify:
         - Reboot host
         - Wait for AD services
@@ -39,6 +40,7 @@
         groups: "{{ item.groups }}"
         password: "{{ lookup('community.general.random_string', min_lower=1, min_upper=1, min_special=1, min_numeric=1) }}"
         update_password: on_create
+      register: user_output
       loop:
         - name: "UserA"
           groups: "GroupA"
@@ -48,6 +50,12 @@
           groups: "GroupC"
       retries: 5
       delay: 10
+
+    - debug: 
+        var: win_domain_output
+
+    - debug: 
+        var: user_output
 
   handlers:
     - name: Reboot host
