@@ -3,6 +3,10 @@
   hosts: "{{ _hosts | default('os_windows') }}"
   gather_facts: false
 
+  vars:
+    safe_mode_password: "{{ lookup('community.general.random_string', min_lower=1, min_upper=1, min_special=1, min_numeric=1) }}"
+    password: "{{ lookup('community.general.random_string', min_lower=1, min_upper=1, min_special=1, min_numeric=1) }}"
+    
   tasks:
     - name: Set Local Admin Password
       ansible.windows.win_user:
@@ -12,7 +16,7 @@
     - name: Create new domain in a new forest on the target host
       ansible.windows.win_domain:
         dns_domain_name: ansible.local
-        safe_mode_password: "{{ lookup('community.general.random_string', min_lower=1, min_upper=1, min_special=1, min_numeric=1) }}"
+        safe_mode_password: "{{ safe_mode_password }}"
       register: win_domain_output
       notify:
         - Reboot host
@@ -38,7 +42,7 @@
       community.windows.win_domain_user:
         name: "{{ item.name }}"
         groups: "{{ item.groups }}"
-        password: "{{ lookup('community.general.random_string', min_lower=1, min_upper=1, min_special=1, min_numeric=1) }}"
+        password: "{{ password }}"
         update_password: on_create
       register: user_output
       loop:
@@ -49,15 +53,17 @@
         - name: "UserC"
           groups: "GroupC"
         - name: "UserD"
-          groups: "GroupC"        
+          groups: "GroupC"
+        - name: "User E"
+          groups: "Group C"
       retries: 5
       delay: 10
 
     - debug: 
-        var: win_domain_output
+        var: safe_mode_password
 
     - debug: 
-        var: user_output
+        var: password
 
   handlers:
     - name: Reboot host
