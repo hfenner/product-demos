@@ -11,3 +11,29 @@ components:
       cpuRequest: 250m
       cpuLimit: 2000m
       args: ['tail', '-f', '/dev/null']
+  - name: tooling-container
+    container:
+      image: ghcr.io/ansible/ansible-devspaces@sha256:a28fa23d254ff1b3ae10b95a0812132148f141bda4516661e40d0c49c4ace200 # v24.10.2
+      memoryRequest: 256M
+      memoryLimit: 6Gi
+      cpuRequest: 250m
+      cpuLimit: 2000m
+      args: ['tail', '-f', '/dev/null']
+      env:
+        - name: 'ANSIBLE_COLLECTIONS_PATH'
+          value: '~/.ansible/collections:/usr/share/ansible/collections:/projects/ansible-devspaces-demo/collections'
+projects:
+  - name: repo-one
+    git:
+      remotes:
+        origin: https://github.com/hfenner/echrhdirt.git
+      checkoutFrom:
+        revision: main
+    clonePath: rhdirt
+  - name: repo-two
+    git:
+      remotes:
+        origin: https://github.com/example/product-demos.git
+      checkoutFrom:
+        revision: holden
+    clonePath: product-demos
