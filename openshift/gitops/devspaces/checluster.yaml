@@ -1,0 +1,32 @@
+apiVersion: org.eclipse.che/v2
+kind: CheCluster
+metadata:
+  name: devspaces
+  namespace: openshift-devspaces
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  components:
+    cheServer:
+      debug: false
+      logLevel: INFO
+    dashboard: {}
+    devWorkspace: {}
+    pluginRegistry: {}
+  devEnvironments:
+    security:
+      podSecurityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+    containerRunConfiguration:
+      openShiftSecurityContextConstraint: nested-container-runasany
+      workspacesPodAnnotations:
+        io.kubernetes.cri-o.Devices: /dev/fuse,/dev/net/tun
+        io.openshift.podman-fuse: ""
+    startTimeoutSeconds: 600
+    disableContainerRunCapabilities: false
+    storage:
+      pvcStrategy: per-user
+    defaultNamespace:
+      autoProvision: true
+  networking: {}

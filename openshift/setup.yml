@@ -215,22 +215,22 @@ controller_templates:
           default: "openshift-cnv-rhel*"
           required: true
 
-  - name: OpenShift | Dev Spaces
+  - name: OpenShift | GitLab
     job_type: run
     inventory: Ansible Product Demos Inventory
     project: "Ansible Product Demos"
-    playbook: "openshift/devspaces.yml"
+    playbook: "openshift/gitlab.yml"
     notification_templates_started: Telemetry
     notification_templates_success: Telemetry
     notification_templates_error: Telemetry
     credentials:
       - OpenShift Credential
 
-  - name: OpenShift | GitLab
+  - name: OpenShift | GitOps | Deploy
     job_type: run
     inventory: Ansible Product Demos Inventory
     project: "Ansible Product Demos"
-    playbook: "openshift/gitlab.yml"
+    playbook: "openshift/gitops_deploy.yml"
     notification_templates_started: Telemetry
     notification_templates_success: Telemetry
     notification_templates_error: Telemetry
