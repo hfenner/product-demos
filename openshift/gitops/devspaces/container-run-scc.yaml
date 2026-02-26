@@ -21,7 +21,6 @@ supplementalGroups:
   type: RunAsAny
 seccompProfiles:
 - '*'
-userNamespaceLevel: RequirePodLevel
 volumes:
 - configMap
 - csi
