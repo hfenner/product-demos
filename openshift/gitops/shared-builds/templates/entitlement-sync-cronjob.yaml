@@ -33,10 +33,13 @@ spec:
               oc get secret etc-pki-entitlement \
                 -n openshift-config-managed \
                 -o json \
-                | jq 'del(.metadata.namespace, .metadata.uid, .metadata.resourceVersion,
-                          .metadata.creationTimestamp, .metadata.ownerReferences,
-                          .metadata.managedFields)
-                      | .metadata.namespace = "{{ .Values.namespace }}"' \
-                | oc apply -n {{ .Values.namespace }} --server-side -f -
+                | python3 -c '
+              import json, sys
+              s = json.load(sys.stdin)
+              for key in ["namespace","uid","resourceVersion","creationTimestamp","ownerReferences","managedFields"]:
+                  s["metadata"].pop(key, None)
+              s["metadata"]["namespace"] = "{{ .Values.namespace }}"
+              json.dump(s, sys.stdout)
+              ' | oc apply -n {{ .Values.namespace }} --server-side -f -
 
               echo "etc-pki-entitlement synced to {{ .Values.namespace }}"
