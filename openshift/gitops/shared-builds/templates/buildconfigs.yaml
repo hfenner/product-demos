@@ -10,7 +10,7 @@ spec:
     git:
       uri: {{ .Values.sourceRepo }}
       ref: {{ .Values.sourceRevision }}
-    contextDir: containers/devspaces_ansible
+    contextDir: containers/ansible-devspaces
     sourceSecret:
       name: repo-https-secret
   strategy:
@@ -51,7 +51,7 @@ spec:
     git:
       uri: {{ .Values.sourceRepo }}
       ref: {{ .Values.sourceRevision }}
-    contextDir: ee-dragonslair/context
+    contextDir: containers/ee-dragonslair/context
     sourceSecret:
       name: repo-https-secret
   strategy:
