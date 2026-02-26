@@ -152,6 +152,16 @@
             name: openshift-gitops
             namespace: openshift-gitops
           spec:
+            resourceCustomizations:
+              knownTypeFields:
+              - typeName: build.openshift.io/BuildConfig
+                fieldSpecs:
+                - field: spec
+                  type: build.openshift.io/v1/BuildConfigSpec
+              - typeName: image.openshift.io/ImageStream
+                fieldSpecs:
+                - field: spec
+                  type: image.openshift.io/v1/ImageStreamSpec
             resourceHealthChecks:
             - group: ""
               kind: PersistentVolumeClaim
