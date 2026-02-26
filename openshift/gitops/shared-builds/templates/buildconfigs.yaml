@@ -1,0 +1,81 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: bc-ansible-devspaces
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  source:
+    git:
+      uri: {{ .Values.sourceRepo }}
+      ref: {{ .Values.sourceRevision }}
+    contextDir: containers/devspaces_ansible
+    sourceSecret:
+      name: repo-https-secret
+  strategy:
+    type: Docker
+    dockerStrategy:
+      volumes:
+      - name: etc-pki-entitlement
+        mounts:
+        - destinationPath: /etc/pki/entitlement
+        source:
+          type: Secret
+          secret:
+            secretName: etc-pki-entitlement
+      - name: ansible-config
+        mounts:
+        - destinationPath: /tmp/anstmp
+        source:
+          type: Secret
+          secret:
+            secretName: ansible-config
+      dockerfilePath: Containerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: ansible-devspaces:latest
+  triggers:
+  - type: ConfigChange
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: bc-ee-dragonslair
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  source:
+    git:
+      uri: {{ .Values.sourceRepo }}
+      ref: {{ .Values.sourceRevision }}
+    contextDir: ee-dragonslair/context
+    sourceSecret:
+      name: repo-https-secret
+  strategy:
+    type: Docker
+    dockerStrategy:
+      volumes:
+      - name: etc-pki-entitlement
+        mounts:
+        - destinationPath: /etc/pki/entitlement
+        source:
+          type: Secret
+          secret:
+            secretName: etc-pki-entitlement
+      - name: ansible-config
+        mounts:
+        - destinationPath: /etc/ansible
+        source:
+          type: Secret
+          secret:
+            secretName: ansible-config
+      dockerfilePath: Containerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: ee-dragonslair:latest
+  triggers:
+  - type: ConfigChange

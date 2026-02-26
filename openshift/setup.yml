@@ -262,16 +262,6 @@ controller_templates:
           variable: automationhub_token
           default: CHANGEME
           required: true
-        - question_name: RHSM Username
-          type: text
-          variable: rhsm_username
-          default: CHANGEME
-          required: true
-        - question_name: RHSM Password
-          type: password
-          variable: rhsm_password
-          default: CHANGEME
-          required: true
         - question_name: Quay.io Username
           type: text
           variable: quay_username
