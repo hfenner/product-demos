@@ -1,0 +1,4 @@
+apiVersion: v2
+name: user-devspace
+version: 0.1.0
+description: Per-user DevSpaces workspace resources (namespace, SCC bindings, PVC)

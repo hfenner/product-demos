@@ -1,0 +1,4 @@
+apiVersion: v2
+name: external-secrets
+version: 0.1.0
+description: External Secrets Operator and ClusterSecretStore for AWS Parameter Store

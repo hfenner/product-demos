@@ -1,0 +1,4 @@
+apiVersion: v2
+name: user-projects
+version: 0.1.0
+description: Per-user ArgoCD AppProjects, RBAC, and ApplicationSet for self-service GitOps

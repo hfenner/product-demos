@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: user-devspaces
+  namespace: openshift-gitops
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - list:
+        elements:
+          {{- range .Values.users }}
+          - username: {{ . }}
+          {{- end }}
+  template:
+    metadata:
+      name: '{{`{{ .username }}`}}-devspace'
+    spec:
+      project: '{{`{{ .username }}`}}'
+      source:
+        repoURL: {{ .Values.repoURL }}
+        targetRevision: {{ .Values.targetRevision }}
+        path: openshift/gitops/user-devspace
+        helm:
+          parameters:
+            - name: username
+              value: '{{`{{ .username }}`}}'
+      destination:
+        server: https://kubernetes.default.svc
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=false
+          - ServerSideApply=true

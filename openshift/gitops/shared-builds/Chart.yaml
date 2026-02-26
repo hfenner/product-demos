@@ -1,0 +1,4 @@
+apiVersion: v2
+name: shared-builds
+version: 0.1.0
+description: Shared build namespace with BuildConfigs, ImageStreams, and ExternalSecrets

@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: shared-builds
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/hfenner/product-demos.git
+    targetRevision: main
+    path: openshift/gitops/shared-builds
+  destination:
+    server: https://kubernetes.default.svc
+  ignoreDifferences:
+  - group: external-secrets.io
+    kind: ExternalSecret
+    jsonPointers:
+    - /spec/data/0/remoteRef/conversionStrategy
+    - /spec/data/0/remoteRef/decodingStrategy
+    - /spec/data/0/remoteRef/metadataPolicy
+    - /spec/data/1/remoteRef/conversionStrategy
+    - /spec/data/1/remoteRef/decodingStrategy
+    - /spec/data/1/remoteRef/metadataPolicy
+    - /spec/target/creationPolicy
+    - /spec/target/deletionPolicy
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - ServerSideApply=true
+    - RespectIgnoreDifferences=true

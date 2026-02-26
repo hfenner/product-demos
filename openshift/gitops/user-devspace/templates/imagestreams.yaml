@@ -1,0 +1,37 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: ansible-devspaces
+  namespace: {{ .Values.username }}-devspaces
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  lookupPolicy:
+    local: true
+  tags:
+    - name: latest
+      from:
+        kind: ImageStreamTag
+        name: ansible-devspaces:latest
+        namespace: shared-builds
+      referencePolicy:
+        type: Local
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: ee-dragonslair
+  namespace: {{ .Values.username }}-devspaces
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  lookupPolicy:
+    local: true
+  tags:
+    - name: latest
+      from:
+        kind: ImageStreamTag
+        name: ee-dragonslair:latest
+        namespace: shared-builds
+      referencePolicy:
+        type: Local
