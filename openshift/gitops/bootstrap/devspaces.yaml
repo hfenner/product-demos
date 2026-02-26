@@ -11,6 +11,11 @@ spec:
     path: openshift/gitops/devspaces
   destination:
     server: https://kubernetes.default.svc
+  ignoreDifferences:
+  - group: security.openshift.io
+    kind: SecurityContextConstraints
+    jsonPointers:
+    - /userNamespaceLevel
   syncPolicy:
     automated:
       prune: true
@@ -18,3 +23,4 @@ spec:
     syncOptions:
     - ServerSideApply=true
     - SkipDryRunOnMissingResource=true
+    - RespectIgnoreDifferences=true
