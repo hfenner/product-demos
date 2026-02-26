@@ -11,7 +11,7 @@ controller_credentials:
       verify_ssl: false
 
   - name: AWS Secrets Manager Lookup
-    credential_type: AWS Secrets Manager Lookup
+    credential_type: AWS Secrets Manager lookup
     organization: Ansible Product Demos (APD)
     update_secrets: false
     state: exists
