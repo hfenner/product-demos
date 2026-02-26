@@ -16,8 +16,8 @@ controller_credentials:
     update_secrets: false
     state: exists
     inputs:
-      username: CHANGEME
-      password: CHANGEME
+      aws_access_key: CHANGEME
+      aws_secret_key: CHANGEME
 
 controller_inventory_sources:
   - name: OpenShift CNV Inventory
