@@ -1,0 +1,4 @@
+apiVersion: v2
+name: devspaces
+version: 0.1.0
+description: DevSpaces operator and configuration

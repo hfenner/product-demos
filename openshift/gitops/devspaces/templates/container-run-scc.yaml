@@ -21,6 +21,9 @@ supplementalGroups:
   type: RunAsAny
 seccompProfiles:
 - '*'
+{{- if semverCompare ">=1.31" .Capabilities.KubeVersion.Version }}
+userNamespaceLevel: RequirePodLevel
+{{- end }}
 volumes:
 - configMap
 - csi
