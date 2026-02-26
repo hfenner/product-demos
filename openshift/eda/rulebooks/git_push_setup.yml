@@ -1,0 +1,19 @@
+---
+- name: Listen for git push events and run OpenShift setup
+  hosts: all
+  sources:
+    - ansible.eda.webhook:
+        host: 0.0.0.0
+        port: 5000
+  rules:
+    - name: Run OpenShift setup on push to main
+      condition: >-
+        event.meta.headers.X_GitHub_Event == "push" and
+        event.payload.ref == "refs/heads/main"
+      action:
+        run_job_template:
+          name: "APD | Single demo setup"
+          organization: "Ansible Product Demos (APD)"
+          job_args:
+            extra_vars:
+              demo: openshift
