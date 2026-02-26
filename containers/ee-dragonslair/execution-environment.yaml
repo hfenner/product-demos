@@ -1,0 +1,30 @@
+version: 3
+images:
+  base_image:
+    name: registry.redhat.io/ansible-automation-platform-26/ee-minimal-rhel9:latest
+dependencies:
+  galaxy: requirements.yaml
+  python: requirements.txt
+  system:
+    - python3-pip
+    - python3-setuptools
+    - systemd-devel
+    - openldap-devel
+    - gcc
+    - gcc-c++
+    - python3-devel
+    - terraform
+options:
+  package_manager_path: /usr/bin/microdnf
+additional_build_files:
+  - src: hashicorp.repo
+    dest: configs
+additional_build_steps:
+  prepend_builder:
+    # Shim for openshift-clients repo
+    - ENV PKGMGR_OPTS="--nodocs --setopt=install_weak_deps=0 --setopt=rhocp-4.19-for-rhel-9-x86_64-rpms.enabled=true --setopt=ansible-automation-platform-2.6-for-rhel-9-x86_64-rpms.enabled=true"
+    - ADD _build/configs/hashicorp.repo /etc/yum.repos.d/hashicorp.repo
+  prepend_final:
+    # Shim for openshift-clients repo
+    - ENV PKGMGR_OPTS="--nodocs --setopt=install_weak_deps=0 --setopt=rhocp-4.19-for-rhel-9-x86_64-rpms.enabled=true --setopt=ansible-automation-platform-2.6-for-rhel-9-x86_64-rpms.enabled=true"
+    - ADD _build/configs/hashicorp.repo /etc/yum.repos.d/hashicorp.repo

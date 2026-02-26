@@ -1,0 +1,65 @@
+---
+- name: Update Execution Environment Build
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    github_token: "{{ lookup('env', 'GITHUB_TOKEN') }}"
+    git_user: ansible_automation_platform
+    git_user_email: ansible_automation_platform@dragonslair.dev
+    commit_message: "Create context dir for execution environment"
+    git_dir: /tmp/ansible-devspaces
+    buildconfig: bc-ee-dragonslair
+    namespace: hfenner-devspaces
+
+  tasks:
+    - name: Git checkout
+      ansible.builtin.git: # noqa: latest
+        repo: "https://{{ github_token }}@github.com/hfenner/ansible-devspaces"
+        dest: "{{ git_dir }}"
+        depth: 1
+
+    - name: Use Ansible builder to create EE blueprint
+      ansible.builtin.command:
+      args:
+        cmd: "ansible-builder create"
+        chdir: "{{ git_dir }}/ee-dragonslair"
+      register: ansible_builder_output
+      changed_when: ansible_builder_output.rc != 0
+
+    - name: Add context directory for possible commits
+      ansible.builtin.command: # noqa: command-instead-of-module
+      args:
+        cmd: "git add -f context/"
+        chdir: "{{ git_dir }}/ee-dragonslair"
+      register: git_add_output
+      changed_when: git_add_output.rc != 0
+
+    - name: Detect if staging area has changes
+      ansible.builtin.command: # noqa: command-instead-of-module
+        cmd: git diff --cached
+        chdir: "{{ git_dir }}/ee-dragonslair"
+      register: git_diff_output
+      changed_when: git_diff_output.stdout | length > 0
+
+    - name: Commit any changes
+      ansible.builtin.command: # noqa: command-instead-of-module
+      args:
+        cmd: "git -c user.name={{ git_user }} -c user.email={{ git_user_email }} commit -m '{{ commit_message }}'"
+        chdir: "{{ git_dir }}"
+      register: git_commit_output
+      changed_when: git_commit_output.rc != 1
+      failed_when: git_commit_output.rc not in [0, 1]
+
+    - name: Push updates (if any)
+      ansible.builtin.command: # noqa: command-instead-of-module
+      args:
+        cmd: "git push"
+        chdir: "{{ git_dir }}"
+      register: git_push_output
+      changed_when: git_push_output.rc != 0
+
+    - name: Starts build from build config
+      redhat.openshift.openshift_build:
+        namespace: "{{ namespace }}"
+        build_config_name: "{{ buildconfig }}"

@@ -1,0 +1,96 @@
+FROM registry.redhat.io/ubi9/ubi:latest
+
+ARG PYV=3.11
+ARG LOCAL_BUILD=false
+
+
+USER 0
+
+COPY 1password.repo /etc/yum.repos.d/1password.repo
+COPY hashicorp.repo /etc/yum.repos.d/hashicorp.repo
+COPY github.repo /etc/yum.repos.d/github.repo
+COPY microsoft-prod.repo /etc/yum.repos.d/microsoft-prod.repo
+COPY epel.repo /etc/yum.repos.d/epel.repo
+
+WORKDIR /tmp
+COPY requirements.txt .
+COPY requirements.yaml .
+
+RUN useradd -m user \
+    &&  chown -R user:user /home/user
+
+# Rootless podman in Dev Spaces runs as UID 10001. Provide uid/gid ranges and
+# default to fuse-overlayfs to avoid kernel overlay mount permission failures.
+RUN echo '10001:100000:65536' >> /etc/subuid \
+    && echo '10001:100000:65536' >> /etc/subgid \
+    && mkdir -p /home/user/.config/containers \
+    && printf '[storage]\ndriver = \"overlay\"\n\n[storage.options.overlay]\nmount_program = \"/usr/bin/fuse-overlayfs\"\n' > /home/user/.config/containers/storage.conf \
+    && chown -R 10001:0 /home/user/.config
+
+# hadolint ignore=DL3041
+RUN rpm --import https://downloads.1password.com/linux/keys/1password.asc \
+    && rpm --import https://packages.microsoft.com/keys/microsoft.asc \
+    && dnf --setopt=subscription-manager.enabled=0 --disablerepo='rhel-*' module enable nodejs:20 -y \
+    && (dnf --setopt=subscription-manager.enabled=0 --disablerepo='rhel-*' check-update -y || true) \
+    && dnf --setopt=subscription-manager.enabled=0 --disablerepo='rhel-*' --enablerepo='epel' install -y \
+       gcc \
+       gcc-c++ \
+       make \
+       jq \
+       wget \
+       podman \
+       fuse-overlayfs \
+       slirp4netns \
+       1password-cli \
+       unzip \
+       terraform \
+       vault \
+       gh \
+       vim \
+       iputils \
+       bind-utils \
+       nmap \
+       nodejs \
+       npm \
+       python3.11-pip \
+       procps-ng \
+       python3.11-devel \
+       openldap-devel \
+       openldap-clients \
+       krb5-workstation \
+    && dnf --setopt=subscription-manager.enabled=0 --disablerepo='rhel-*' install -y \
+       --enablerepo=packages-microsoft-com-prod \
+       powershell \
+    && dnf clean all \
+    && rm -rf /var/cache/dnf
+# hadolint ignore=DL3013
+RUN pip3.11 install --no-cache-dir awxkit ansible-dev-tools
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip \
+    && ./aws/install \
+    && rm awscliv2.zip \
+    && rm -rf ./aws
+RUN pip3.11 install --no-cache-dir -r requirements.txt
+# hadolint ignore=DL3016
+RUN npm install -g @anthropic-ai/claude-code
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+RUN curl -L -o - "https://github.com/vmware/govmomi/releases/latest/download/govc_$(uname -s)_$(uname -m).tar.gz" | tar -C /usr/local/bin -xvzf - govc
+RUN curl -L -o - "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/stable/openshift-client-linux.tar.gz" | tar -C /usr/local/bin -xvzf - oc kubectl
+RUN curl -L https://mirror.openshift.com/pub/openshift-v4/clients/helm/latest/helm-linux-amd64 -o /usr/local/bin/helm \
+    && chmod +x /usr/local/bin/helm
+RUN --mount=type=secret,id=ansible_cfg \
+    if [ "$LOCAL_BUILD" = "true" ]; then \
+      cp /run/secrets/ansible_cfg /tmp/ansible.cfg \
+      && ANSIBLE_CONFIG=/tmp/ansible.cfg \
+      ansible-galaxy collection install -r requirements.yaml -p /collections; \
+    else \
+      ANSIBLE_CONFIG=/tmp/anstmp/ansible.cfg \
+      ansible-galaxy collection install -r requirements.yaml -p /collections; \
+    fi
+RUN mkdir -p /opt/ansible
+COPY --chmod=755 vault_env_reader.sh /opt/ansible/vault_env_reader.sh
+
+# Configure environment
+ENV ANSIBLE_VAULT_PASSWORD_FILE=/opt/ansible/vault_env_reader.sh
+
+USER 10001
