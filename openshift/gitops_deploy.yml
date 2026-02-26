@@ -9,6 +9,29 @@
     gitops_repo_branch: main
 
   tasks:
+    - name: Create external-secrets namespace
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: external-secrets
+
+    - name: Create external-secrets-aws-credentials secret
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: external-secrets-aws-credentials
+            namespace: external-secrets
+          type: Opaque
+          data:
+            aws_access_key_id: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') | b64encode }}"
+            aws_secret_access_key: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') | b64encode }}"
+
     - name: Create OpenShift GitOps namespace
       kubernetes.core.k8s:
         state: present
