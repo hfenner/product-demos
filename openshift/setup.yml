@@ -237,6 +237,52 @@ controller_templates:
     credentials:
       - OpenShift Credential
 
+  - name: OpenShift | AWS | Populate Secrets Manager
+    job_type: run
+    inventory: Ansible Product Demos Inventory
+    project: "Ansible Product Demos"
+    playbook: "openshift/aws_secrets_manager.yml"
+    notification_templates_started: Telemetry
+    notification_templates_success: Telemetry
+    notification_templates_error: Telemetry
+    credentials:
+      - AWS
+    survey_enabled: true
+    survey:
+      name: ''
+      description: ''
+      spec:
+        - question_name: GitHub Token
+          type: password
+          variable: github_token
+          default: CHANGEME
+          required: true
+        - question_name: Automation Hub Token
+          type: password
+          variable: automationhub_token
+          default: CHANGEME
+          required: true
+        - question_name: RHSM Username
+          type: text
+          variable: rhsm_username
+          default: CHANGEME
+          required: true
+        - question_name: RHSM Password
+          type: password
+          variable: rhsm_password
+          default: CHANGEME
+          required: true
+        - question_name: Quay.io Username
+          type: text
+          variable: quay_username
+          default: CHANGEME
+          required: true
+        - question_name: Quay.io Password
+          type: password
+          variable: quay_password
+          default: CHANGEME
+          required: true
+
 controller_workflows:
   - name: OpenShift | CNV | Infra Stack
     description: A workflow to deploy Virtualized infra in OCP Virtalization
