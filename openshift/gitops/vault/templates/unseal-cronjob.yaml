@@ -1,0 +1,122 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: vault-unseal
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  schedule: "* * * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 55
+      template:
+        spec:
+          serviceAccountName: vault-unseal
+          restartPolicy: Never
+          containers:
+            - name: unseal
+              image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -e
+
+                  VAULT_ADDR="http://vault.{{ .Values.namespace }}.svc:8200"
+                  SECRET_NAME="vault-unseal-keys"
+                  SA_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+                  API="https://kubernetes.default.svc"
+                  CACERT="/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+                  NS="{{ .Values.namespace }}"
+
+                  # Wait for vault to be reachable
+                  for i in $(seq 1 30); do
+                    if curl -sf "${VAULT_ADDR}/v1/sys/health" -o /dev/null 2>/dev/null || \
+                       curl -sf "${VAULT_ADDR}/v1/sys/seal-status" -o /dev/null 2>/dev/null; then
+                      break
+                    fi
+                    echo "Waiting for Vault to be reachable..."
+                    sleep 2
+                  done
+
+                  # Get seal status
+                  SEAL_STATUS=$(curl -sf "${VAULT_ADDR}/v1/sys/seal-status" 2>/dev/null) || {
+                    echo "Vault not reachable, exiting"
+                    exit 0
+                  }
+
+                  INITIALIZED=$(echo "${SEAL_STATUS}" | grep -o '"initialized":[a-z]*' | cut -d: -f2)
+                  SEALED=$(echo "${SEAL_STATUS}" | grep -o '"sealed":[a-z]*' | cut -d: -f2)
+
+                  echo "Vault status: initialized=${INITIALIZED}, sealed=${SEALED}"
+
+                  # If already unsealed, nothing to do
+                  if [ "${SEALED}" = "false" ]; then
+                    echo "Vault is already unsealed"
+                    exit 0
+                  fi
+
+                  # Helper: read secret from Kubernetes API
+                  get_secret() {
+                    curl -sf --cacert "${CACERT}" \
+                      -H "Authorization: Bearer ${SA_TOKEN}" \
+                      "${API}/api/v1/namespaces/${NS}/secrets/${SECRET_NAME}"
+                  }
+
+                  # Helper: create/update secret via Kubernetes API
+                  save_secret() {
+                    local DATA="$1"
+                    # Try to create; if it exists, patch instead
+                    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --cacert "${CACERT}" \
+                      -H "Authorization: Bearer ${SA_TOKEN}" \
+                      -H "Content-Type: application/json" \
+                      -X POST "${API}/api/v1/namespaces/${NS}/secrets" \
+                      -d "{\"apiVersion\":\"v1\",\"kind\":\"Secret\",\"metadata\":{\"name\":\"${SECRET_NAME}\",\"namespace\":\"${NS}\"},\"type\":\"Opaque\",\"data\":${DATA}}")
+
+                    if [ "${HTTP_CODE}" = "409" ]; then
+                      curl -sf --cacert "${CACERT}" \
+                        -H "Authorization: Bearer ${SA_TOKEN}" \
+                        -H "Content-Type: application/strategic-merge-patch+json" \
+                        -X PATCH "${API}/api/v1/namespaces/${NS}/secrets/${SECRET_NAME}" \
+                        -d "{\"data\":${DATA}}" > /dev/null
+                    fi
+                  }
+
+                  # Helper: base64 encode (portable)
+                  b64() { echo -n "$1" | base64 | tr -d '\n'; }
+
+                  # Initialize if needed
+                  if [ "${INITIALIZED}" = "false" ]; then
+                    echo "Initializing Vault..."
+                    INIT_RESPONSE=$(curl -sf "${VAULT_ADDR}/v1/sys/init" \
+                      -X PUT \
+                      -H "Content-Type: application/json" \
+                      -d '{"secret_shares":1,"secret_threshold":1}')
+
+                    UNSEAL_KEY=$(echo "${INIT_RESPONSE}" | grep -o '"keys":\["[^"]*"\]' | grep -o '\["[^"]*"\]' | tr -d '[]"')
+                    ROOT_TOKEN=$(echo "${INIT_RESPONSE}" | grep -o '"root_token":"[^"]*"' | cut -d'"' -f4)
+
+                    echo "Storing unseal keys in Secret/${SECRET_NAME}"
+                    DATA="{\"unseal-key-0\":\"$(b64 "${UNSEAL_KEY}")\",\"root-token\":\"$(b64 "${ROOT_TOKEN}")\"}"
+                    save_secret "${DATA}"
+                  fi
+
+                  # Read unseal key from secret
+                  SECRET_DATA=$(get_secret) || {
+                    echo "ERROR: Vault is sealed but no unseal keys found in Secret/${SECRET_NAME}"
+                    exit 1
+                  }
+
+                  UNSEAL_KEY=$(echo "${SECRET_DATA}" | grep -o '"unseal-key-0":"[^"]*"' | cut -d'"' -f4 | base64 -d)
+
+                  echo "Unsealing Vault..."
+                  curl -sf "${VAULT_ADDR}/v1/sys/unseal" \
+                    -X PUT \
+                    -H "Content-Type: application/json" \
+                    -d "{\"key\":\"${UNSEAL_KEY}\"}" > /dev/null
+
+                  echo "Vault unsealed successfully"
