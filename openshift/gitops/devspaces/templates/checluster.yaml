@@ -18,13 +18,15 @@ spec:
       podSecurityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
+    {{- if .Values.containerRunEnabled }}
     containerRunConfiguration:
       openShiftSecurityContextConstraint: nested-container-runasany
       workspacesPodAnnotations:
         io.kubernetes.cri-o.Devices: /dev/fuse,/dev/net/tun
         io.openshift.podman-fuse: ""
-    startTimeoutSeconds: 600
     disableContainerRunCapabilities: false
+    {{- end }}
+    startTimeoutSeconds: 600
     storage:
       pvcStrategy: per-user
     defaultNamespace:

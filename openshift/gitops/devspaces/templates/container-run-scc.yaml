@@ -1,3 +1,4 @@
+{{- if .Values.containerRunEnabled }}
 apiVersion: security.openshift.io/v1
 kind: SecurityContextConstraints
 metadata:
@@ -21,9 +22,7 @@ supplementalGroups:
   type: RunAsAny
 seccompProfiles:
 - '*'
-{{- if semverCompare ">=1.31" .Capabilities.KubeVersion.Version }}
 userNamespaceLevel: RequirePodLevel
-{{- end }}
 volumes:
 - configMap
 - csi
@@ -34,3 +33,4 @@ volumes:
 - persistentVolumeClaim
 - projected
 - secret
+{{- end }}

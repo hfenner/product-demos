@@ -1,0 +1,4 @@
+# Enable container-run features (nested containers via podman/buildah).
+# Requires OCP 4.20+ (K8s 1.33+) for hostUsers: false and procMount: Unmasked.
+# Set to true for 4.20+ clusters; leave false for 4.18 and earlier.
+containerRunEnabled: false
