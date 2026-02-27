@@ -1,0 +1,4 @@
+apiVersion: v2
+name: vault
+version: 0.1.0
+description: HashiCorp Vault deployed via community OLM operator
