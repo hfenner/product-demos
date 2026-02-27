@@ -13,6 +13,7 @@ spec:
     path: openshift/gitops/vault
   destination:
     server: https://kubernetes.default.svc
+    namespace: vault
   syncPolicy:
     automated:
       prune: true
