@@ -1,6 +1,5 @@
 namespace: vault
-route:
-  name: vault-vault
+domain: apps.cluster-j9bqh-1.dynamic.redhatworkshops.io
 
 vault:
   global:
