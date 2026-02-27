@@ -12,6 +12,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "3"
 spec:
   chart:
+    version: {{ .Values.chartVersion | quote }}
     values:
       global:
         hosts:

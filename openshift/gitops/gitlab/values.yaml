@@ -1,3 +1,4 @@
 namespace: gitlab-system
+chartVersion: "9.9.1"
 route:
   name: gitlab-webservice-default
