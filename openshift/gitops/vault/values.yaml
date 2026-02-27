@@ -5,6 +5,7 @@ route:
 vault:
   global:
     openshift: true
+    namespace: vault
   server:
     standalone:
       enabled: true
