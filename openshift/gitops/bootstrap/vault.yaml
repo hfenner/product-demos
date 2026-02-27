@@ -25,5 +25,4 @@ spec:
         factor: 1
         maxDuration: 5m
     syncOptions:
-    - ServerSideApply=true
     - SkipDryRunOnMissingResource=true
