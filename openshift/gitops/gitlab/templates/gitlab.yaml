@@ -19,3 +19,40 @@ spec:
         enabled: false
       certmanager:
         install: false
+      gitlab:
+        gitlab-shell:
+          minReplicas: 1
+          maxReplicas: 1
+        webservice:
+          minReplicas: 1
+          maxReplicas: 1
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1500M
+        sidekiq:
+          minReplicas: 1
+          maxReplicas: 1
+          resources:
+            requests:
+              cpu: 200m
+              memory: 1G
+        gitlab-exporter:
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64M
+        kas:
+          minReplicas: 1
+          maxReplicas: 1
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+      registry:
+        minReplicas: 1
+        maxReplicas: 1
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
