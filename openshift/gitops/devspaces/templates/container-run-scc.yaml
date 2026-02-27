@@ -1,4 +1,4 @@
-{{- if .Values.containerRunEnabled }}
+{{- if semverCompare ">=1.33-0" .Capabilities.KubeVersion.Version }}
 apiVersion: security.openshift.io/v1
 kind: SecurityContextConstraints
 metadata:

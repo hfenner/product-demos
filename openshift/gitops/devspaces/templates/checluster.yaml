@@ -18,7 +18,7 @@ spec:
       podSecurityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
-    {{- if .Values.containerRunEnabled }}
+    {{- if semverCompare ">=1.33-0" .Capabilities.KubeVersion.Version }}
     containerRunConfiguration:
       openShiftSecurityContextConstraint: nested-container-runasany
       workspacesPodAnnotations:
