@@ -14,11 +14,11 @@ spec:
     devWorkspace: {}
     pluginRegistry: {}
   devEnvironments:
+    {{- if semverCompare ">=1.33-0" .Capabilities.KubeVersion.Version }}
     security:
       podSecurityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
-    {{- if semverCompare ">=1.33-0" .Capabilities.KubeVersion.Version }}
     containerRunConfiguration:
       openShiftSecurityContextConstraint: nested-container-runasany
       workspacesPodAnnotations:
