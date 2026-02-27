@@ -1,13 +1,16 @@
+{{- $route := lookup "route.openshift.io/v1" "Route" .Values.namespace .Values.route.name }}
+{{- if $route }}
 apiVersion: console.openshift.io/v1
 kind: ConsoleLink
 metadata:
   name: vault
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   location: ApplicationMenu
   text: HashiCorp Vault
-  href: https://vault-{{ .Values.namespace }}.{{ .Values.domain }}
+  href: https://{{ $route.spec.host }}
   applicationMenu:
     section: Red Hat Applications
-    imageURL: https://vault-{{ .Values.namespace }}.{{ .Values.domain }}/ui/favicon.ico
+    imageURL: https://{{ $route.spec.host }}/ui/favicon.ico
+{{- end }}

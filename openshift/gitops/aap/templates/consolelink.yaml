@@ -1,11 +1,16 @@
+{{- $route := lookup "route.openshift.io/v1" "Route" .Values.namespace .Values.route.name }}
+{{- if $route }}
 apiVersion: console.openshift.io/v1
 kind: ConsoleLink
 metadata:
   name: aap
+  annotations:
+    argocd.argoproj.io/sync-wave: "5"
 spec:
   location: ApplicationMenu
   text: Ansible Automation Platform
-  href: https://aap-aap.{{ .Values.domain }}
+  href: https://{{ $route.spec.host }}
   applicationMenu:
     section: Red Hat Applications
-    imageURL: https://aap-aap.{{ .Values.domain }}/favicon.ico
+    imageURL: https://{{ $route.spec.host }}/favicon.ico
+{{- end }}

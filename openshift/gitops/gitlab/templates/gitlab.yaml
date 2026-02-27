@@ -1,3 +1,8 @@
+{{- $ingress := lookup "config.openshift.io/v1" "Ingress" "" "cluster" }}
+{{- $domain := "apps.example.com" }}
+{{- if and $ingress $ingress.spec }}
+{{- $domain = $ingress.spec.domain }}
+{{- end }}
 apiVersion: apps.gitlab.com/v1beta1
 kind: GitLab
 metadata:
@@ -10,7 +15,7 @@ spec:
     values:
       global:
         hosts:
-          domain: {{ .Values.domain }}
+          domain: {{ $domain }}
         ingress:
           provider: none
           configureCertmanager: false
