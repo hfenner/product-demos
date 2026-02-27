@@ -1,0 +1,11 @@
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: aap
+spec:
+  location: ApplicationMenu
+  text: Ansible Automation Platform
+  href: https://aap-aap.{{ .Values.domain }}
+  applicationMenu:
+    section: Red Hat Applications
+    imageURL: https://aap-aap.{{ .Values.domain }}/favicon.ico

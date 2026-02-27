@@ -1,0 +1,13 @@
+apiVersion: console.openshift.io/v1
+kind: ConsoleLink
+metadata:
+  name: vault
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  location: ApplicationMenu
+  text: HashiCorp Vault
+  href: https://vault-{{ .Values.namespace }}.{{ .Values.domain }}
+  applicationMenu:
+    section: Red Hat Applications
+    imageURL: https://vault-{{ .Values.namespace }}.{{ .Values.domain }}/ui/favicon.ico
