@@ -4,7 +4,7 @@ metadata:
   name: vault-unseal
   namespace: {{ .Values.namespace }}
   annotations:
-    argocd.argoproj.io/sync-wave: "5"
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   schedule: "* * * * *"
   successfulJobsHistoryLimit: 1
