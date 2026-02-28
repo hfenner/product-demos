@@ -21,9 +21,8 @@ spec:
         install: false
       gitlab:
         gitlab-shell:
-          hpa:
-            minReplicas: 1
-            maxReplicas: 1
+          minReplicas: 1
+          maxReplicas: 1
         webservice:
           hpa:
             minReplicas: 1
@@ -46,9 +45,8 @@ spec:
               cpu: 50m
               memory: 64M
         kas:
-          hpa:
-            minReplicas: 1
-            maxReplicas: 1
+          minReplicas: 1
+          maxReplicas: 1
           resources:
             requests:
               cpu: 50m
