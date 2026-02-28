@@ -27,6 +27,7 @@ spec:
               value: '{{`{{ .username }}`}}'
       destination:
         server: https://kubernetes.default.svc
+        namespace: '{{`{{ .username }}`}}-devspaces'
       syncPolicy:
         automated:
           prune: true
