@@ -16,6 +16,8 @@ spec:
           class: none
           provider: none
           configureCertmanager: false
+          tls:
+            enabled: false
       nginx-ingress:
         enabled: false
       certmanager:
