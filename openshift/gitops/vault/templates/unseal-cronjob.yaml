@@ -111,12 +111,19 @@ spec:
                     exit 1
                   }
 
-                  UNSEAL_KEY=$(echo "${SECRET_DATA}" | grep -o '"unseal-key-0":"[^"]*"' | cut -d'"' -f4 | base64 -d)
+                  UNSEAL_KEY=$(echo "${SECRET_DATA}" | grep -o '"unseal-key-0": *"[^"]*"' | cut -d'"' -f4 | base64 -d)
 
                   echo "Unsealing Vault..."
-                  curl -sf "${VAULT_ADDR}/v1/sys/unseal" \
+                  UNSEAL_RESULT=$(curl -s -w "\n%{http_code}" "${VAULT_ADDR}/v1/sys/unseal" \
                     -X PUT \
                     -H "Content-Type: application/json" \
-                    -d "{\"key\":\"${UNSEAL_KEY}\"}" > /dev/null
+                    -d "{\"key\":\"${UNSEAL_KEY}\"}")
+                  UNSEAL_HTTP=$(echo "${UNSEAL_RESULT}" | tail -1)
+                  UNSEAL_BODY=$(echo "${UNSEAL_RESULT}" | sed '$d')
 
-                  echo "Vault unsealed successfully"
+                  if [ "${UNSEAL_HTTP}" -ge 200 ] && [ "${UNSEAL_HTTP}" -lt 300 ]; then
+                    echo "Vault unsealed successfully"
+                  else
+                    echo "ERROR: Unseal returned HTTP ${UNSEAL_HTTP}: ${UNSEAL_BODY}"
+                    exit 1
+                  fi
