@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: noobaa-tuning
+  namespace: openshift-gitops
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/hfenner/product-demos.git
+    targetRevision: main
+    path: openshift/gitops/noobaa-tuning
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-storage
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 10
+      backoff:
+        duration: 30s
+        factor: 1
+        maxDuration: 5m
+    syncOptions:
+    - ServerSideApply=true
+    - SkipDryRunOnMissingResource=true

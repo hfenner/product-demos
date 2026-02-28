@@ -1,0 +1,32 @@
+apiVersion: noobaa.io/v1alpha1
+kind: NooBaa
+metadata:
+  name: noobaa
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-options: ServerSideApply=true
+spec:
+  coreResources:
+    requests:
+      cpu: 100m
+      memory: 1Gi
+    limits:
+      cpu: 999m
+      memory: 4Gi
+  dbResources:
+    requests:
+      cpu: 50m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 4Gi
+  endpoints:
+    minCount: 1
+    maxCount: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 500Mi
+      limits:
+        cpu: 999m
+        memory: 2Gi

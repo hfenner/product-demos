@@ -1,0 +1,4 @@
+apiVersion: v2
+name: noobaa-tuning
+version: 0.1.0
+description: Resource tuning for NooBaa on single-node clusters
