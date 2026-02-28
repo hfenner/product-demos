@@ -20,6 +20,7 @@ vault:
         }
     route:
       enabled: true
+      host: vault-vault.apps.cluster-j9bqh-1.dynamic.redhatworkshops.io
     dataStorage:
       enabled: true
       size: 10Gi
