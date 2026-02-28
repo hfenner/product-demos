@@ -12,6 +12,17 @@ spec:
       global:
         hosts:
           domain: {{ .Values.domain }}
+        appConfig:
+          omniauth:
+            enabled: true
+            allowSingleSignOn:
+              - openid_connect
+            autoLinkUser:
+              - openid_connect
+            blockAutoCreatedUsers: false
+            providers:
+              - secret: gitlab-keycloak-oidc
+                key: provider
         ingress:
           class: none
           provider: none
