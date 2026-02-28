@@ -1,0 +1,33 @@
+apiVersion: aap.ansible.com/v1alpha1
+kind: AnsibleAutomationPlatform
+metadata:
+  name: aap
+  namespace: aap
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  controller:
+    disabled: false
+  eda:
+    disabled: false
+    activation_worker:
+      replicas: 1
+    default_worker:
+      replicas: 1
+    scheduler:
+      replicas: 1
+  hub:
+    disabled: false
+    file_storage_access_mode: ReadWriteOnce
+    file_storage_size: 100Gi
+    gunicorn_api_workers: 1
+    gunicorn_content_workers: 1
+    content:
+      replicas: 1
+    worker:
+      replicas: 1
+  lightspeed:
+    disabled: true
+  no_log: true
+  redis_mode: standalone
+  route_tls_termination_mechanism: Edge
