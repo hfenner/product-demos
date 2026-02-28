@@ -16,8 +16,10 @@ spec:
           class: none
           provider: none
           configureCertmanager: false
+          annotations:
+            route.openshift.io/termination: "edge"
           tls:
-            enabled: false
+            enabled: true
       nginx-ingress:
         enabled: false
       certmanager:
