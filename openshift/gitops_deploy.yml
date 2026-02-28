@@ -152,16 +152,6 @@
             name: openshift-gitops
             namespace: openshift-gitops
           spec:
-            resourceCustomizations:
-              knownTypeFields:
-              - typeName: build.openshift.io/BuildConfig
-                fieldSpecs:
-                - field: spec
-                  type: build.openshift.io/v1/BuildConfigSpec
-              - typeName: image.openshift.io/ImageStream
-                fieldSpecs:
-                - field: spec
-                  type: image.openshift.io/v1/ImageStreamSpec
             resourceHealthChecks:
             - group: ""
               kind: PersistentVolumeClaim
@@ -184,6 +174,19 @@
               route:
                 enabled: true
             resourceTrackingMethod: annotation
+
+    - name: Configure ArgoCD knownTypeFields for OpenShift types
+      kubernetes.core.k8s:
+        state: patched
+        kind: ConfigMap
+        name: argocd-cm
+        namespace: openshift-gitops
+        definition:
+          data:
+            resource.customizations.knownTypeFields.build.openshift.io_BuildConfig: |
+              [{"field": "spec", "type": "build.openshift.io/v1/BuildConfigSpec"}]
+            resource.customizations.knownTypeFields.image.openshift.io_ImageStream: |
+              [{"field": "spec", "type": "image.openshift.io/v1/ImageStreamSpec"}]
 
     - name: Create cluster-bootstrap Application
       kubernetes.core.k8s:
