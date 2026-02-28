@@ -13,6 +13,7 @@ spec:
         hosts:
           domain: {{ .Values.domain }}
         ingress:
+          class: none
           provider: none
           configureCertmanager: false
       nginx-ingress:
