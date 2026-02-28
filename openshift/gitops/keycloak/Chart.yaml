@@ -1,0 +1,4 @@
+apiVersion: v2
+name: keycloak
+version: 0.1.0
+description: Red Hat Build of Keycloak deployed via the RHBK Operator
